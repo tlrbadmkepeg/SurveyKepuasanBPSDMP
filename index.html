@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SKM BPSDMP – Kementerian Perdagangan 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<!--
+╔══════════════════════════════════════════════════════════════════╗
+║      PANDUAN SETUP GOOGLE SHEETS — BACA SEBELUM DEPLOY           ║
+╠══════════════════════════════════════════════════════════════════╣
+║  Agar data dari semua responden (800+) terkumpul di satu         ║
+║  tempat saat file ini dipublish/dibagikan, lakukan:              ║
+║                                                                  ║
+║  LANGKAH 1 — Buat Google Sheets baru                             ║
+║    Buka sheets.google.com → buat spreadsheet baru                ║
+║                                                                  ║
+║  LANGKAH 2 — Buat Google Apps Script                             ║
+║    Di spreadsheet: menu Extensions → Apps Script                 ║
+║    Hapus semua kode yang ada, paste kode berikut:                ║
+║                                                                  ║
+║  ---- COPY KODE INI KE APPS SCRIPT ----                          ║
+║                                                                  ║
+║  const SHEET = 'Responses';                                      ║
+║  function doPost(e) {                                            ║
+║    const ss = SpreadsheetApp.getActiveSpreadsheet();             ║
+║    let sh = ss.getSheetByName(SHEET) || ss.insertSheet(SHEET);   ║
+║    const d = JSON.parse(e.postData.contents);                    ║
+║    if (sh.getLastRow() === 0) {                                   ║
+║      sh.appendRow(['Timestamp','Unit','JenisLayanan','Metode',   ║
+║        'JK','Usia','Pendidikan','Disabilitas','Instansi',        ║
+║        'Internal','Kritik','Harapan',                            ║
+║        'U1','U2','U3','U4','U5','U6','U7','U8','U9',             ║
+║        'NilaiSKM','Mutu']);                                      ║
+║    }                                                             ║
+║    sh.appendRow([new Date(d.ts),d.unit,d.jenisLayanan,           ║
+║      d.metode,d.jk,d.usia,d.pendidikan,d.disabilitas,           ║
+║      d.instansi,d.internal,d.kritik,d.harapan,                  ║
+║      d.skm.u1,d.skm.u2,d.skm.u3,d.skm.u4,d.skm.u5,            ║
+║      d.skm.u6,d.skm.u7,d.skm.u8,d.skm.u9,                      ║
+║      d.skm.nilaiSKM,d.skm.mutu.m]);                             ║
+║    return ContentService                                         ║
+║      .createTextOutput(JSON.stringify({ok:true}))                ║
+║      .setMimeType(ContentService.MimeType.JSON);                 ║
+║  }                                                               ║
+║  function doGet(e) {                                             ║
+║    const sh = SpreadsheetApp.getActiveSpreadsheet()              ║
+║                 .getSheetByName(SHEET);                          ║
+║    if (!sh) return out([]);                                      ║
+║    const rows = sh.getDataRange().getValues();                   ║
+║    const h = rows[0];                                            ║
+║    const recs = rows.slice(1).map(r => {                         ║
+║      const o={}; h.forEach((k,i)=>o[k]=r[i]); return o;         ║
+║    });                                                           ║
+║    return ContentService                                         ║
+║      .createTextOutput(JSON.stringify({records:recs}))           ║
+║      .setMimeType(ContentService.MimeType.JSON);                 ║
+║  }                                                               ║
+║                                                                  ║
+║  ---- SELESAI COPY ----                                          ║
+║                                                                  ║
+║  LANGKAH 3 — Deploy                                              ║
+║    Klik Deploy → New deployment → pilih Web app                  ║
+║    Execute as: Me                                                ║
+║    Who has access: Anyone                                        ║
+║    Klik Deploy → Salin URL yang muncul                           ║
+║                                                                  ║
+║  LANGKAH 4 — Tempel URL di CONFIG di bawah ini                   ║
+║    Ganti nilai SCRIPT_URL: '' dengan URL Apps Script Anda        ║
+║    Simpan file, lalu distribusikan via WhatsApp                  ║
+╚══════════════════════════════════════════════════════════════════╝
+-->
+
+<style>
+:root{
+  --navy:#0B1F35;--navy2:#16395C;--navy3:#1E5080;
+  --gold:#C49A1E;--gold2:#E2B93B;--gold3:#F5D875;
+  --white:#FFFFFF;--bg:#EEF2F7;--card:#FFFFFF;
+  --text:#0D1F30;--muted:#5A7A95;--border:#C8D8E8;
+  --green:#1A8C5A;--red:#C0392B;--radius:14px;
+  --shadow:0 4px 24px rgba(11,31,53,0.10);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+#progress-bar{position:fixed;top:0;left:0;width:0%;height:4px;background:linear-gradient(90deg,var(--gold),var(--gold3));z-index:999;transition:width .4s ease;}
+.page-header{background:var(--navy);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:4px;z-index:90;box-shadow:0 2px 20px rgba(0,0,0,.3);}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-badge{width:42px;height:42px;background:var(--gold);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--navy);}
+.brand-text h1{font-size:14px;font-weight:700;color:var(--white);letter-spacing:.5px;}
+.brand-text p{font-size:11px;color:var(--gold2);opacity:.85;}
+.header-nav{display:flex;gap:8px;}
+.btn-nav{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:var(--white);padding:7px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;}
+.btn-nav:hover{background:rgba(255,255,255,.18);}
+.btn-nav.active{background:var(--gold);color:var(--navy);border-color:var(--gold);}
+.view{display:none;min-height:calc(100vh - 70px);}
+.view.active{display:block;}
+
+/* WELCOME */
+#view-welcome{display:none;align-items:center;justify-content:center;padding:40px 20px;background:linear-gradient(160deg,var(--navy) 0%,var(--navy2) 55%,#2A6090 100%);}
+#view-welcome.active{display:flex;flex-direction:column;}
+.welcome-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(10px);border-radius:24px;padding:50px 48px;max-width:640px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+.welcome-emblem{width:80px;height:80px;background:linear-gradient(135deg,var(--gold),var(--gold3));border-radius:20px;display:inline-flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:700;color:var(--navy);margin-bottom:24px;box-shadow:0 8px 24px rgba(196,154,30,.35);}
+.welcome-card h2{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:var(--white);line-height:1.25;margin-bottom:8px;}
+.welcome-subtitle{font-size:13px;color:var(--gold2);font-weight:500;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px;}
+.welcome-card p{font-size:14px;color:rgba(255,255,255,.72);line-height:1.7;margin-bottom:32px;}
+.welcome-meta{display:flex;gap:16px;justify-content:center;margin-bottom:36px;flex-wrap:wrap;}
+.meta-pill{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:6px 16px;font-size:12px;color:rgba(255,255,255,.8);}
+.btn-start{background:linear-gradient(135deg,var(--gold),var(--gold3));color:var(--navy);border:none;padding:16px 40px;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .25s;width:100%;letter-spacing:.3px;box-shadow:0 4px 20px rgba(196,154,30,.4);}
+.btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(196,154,30,.5);}
+
+/* FORM */
+#view-form{padding:32px 20px;}
+.form-wrapper{max-width:720px;margin:0 auto;}
+.step-indicator{display:flex;align-items:center;gap:6px;margin-bottom:28px;flex-wrap:wrap;}
+.step-dot{width:30px;height:6px;border-radius:3px;background:var(--border);transition:all .3s;}
+.step-dot.done{background:var(--gold2);}
+.step-dot.active{background:var(--gold);width:50px;}
+.step-label{font-size:12px;color:var(--muted);margin-left:4px;font-weight:500;}
+.form-step{display:none;}
+.form-step.active{display:block;animation:fadeIn .35s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+.section-card{background:var(--card);border-radius:var(--radius);padding:32px 36px;box-shadow:var(--shadow);margin-bottom:20px;border:1px solid rgba(196,154,30,.12);}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--navy);margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+.section-sub{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.6;}
+.field-group{margin-bottom:22px;}
+.field-label{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;display:block;}
+.req{color:var(--red);margin-left:2px;}
+select,input[type=text],textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:14px;color:var(--text);background:var(--white);transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;}
+select:focus,input[type=text]:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,154,30,.12);}
+textarea{resize:vertical;min-height:90px;}
+.radio-group{display:flex;gap:10px;flex-wrap:wrap;}
+.radio-pill{flex:1;min-width:130px;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;text-align:center;font-size:13px;font-weight:500;color:var(--muted);background:var(--white);display:flex;align-items:center;justify-content:center;gap:6px;}
+.radio-pill:hover{border-color:var(--gold2);color:var(--text);}
+.radio-pill.selected{border-color:var(--gold);background:rgba(196,154,30,.08);color:var(--navy);font-weight:600;}
+.radio-pill input{display:none;}
+.q-block{margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid var(--border);}
+.q-block:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
+.q-num{display:inline-block;background:var(--navy);color:var(--white);font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;margin-bottom:10px;letter-spacing:.5px;}
+.q-text{font-size:14px;color:var(--text);line-height:1.65;margin-bottom:14px;font-weight:500;}
+.likert-wrap{display:flex;gap:8px;flex-wrap:wrap;}
+.likert-btn{flex:1;min-width:110px;padding:10px 8px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s;text-align:center;font-size:12px;font-weight:500;color:var(--muted);background:var(--white);user-select:none;}
+.likert-btn:hover{border-color:var(--navy2);color:var(--text);}
+.likert-btn.sel-1{border-color:#E53E3E;background:#FFF5F5;color:#C53030;}
+.likert-btn.sel-2{border-color:#DD6B20;background:#FFFAF0;color:#C05621;}
+.likert-btn.sel-3{border-color:#2F855A;background:#F0FFF4;color:#276749;}
+.likert-btn.sel-4{border-color:#2B6CB0;background:#EBF8FF;color:#2C5282;}
+.likert-val{font-size:18px;font-weight:700;display:block;margin-bottom:3px;}
+.form-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:8px;}
+.btn-back{background:transparent;border:1.5px solid var(--border);color:var(--muted);padding:12px 28px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-back:hover{border-color:var(--navy2);color:var(--navy);}
+.btn-next{background:var(--navy);color:var(--white);border:none;padding:12px 32px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .25s;}
+.btn-next:hover{background:var(--navy2);}
+.btn-submit{background:linear-gradient(135deg,var(--gold),var(--gold3));color:var(--navy);border:none;padding:14px 36px;border-radius:10px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:all .25s;}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(196,154,30,.4);}
+.notice-box{background:rgba(196,154,30,.1);border:1px solid rgba(196,154,30,.3);border-radius:10px;padding:14px 18px;font-size:13px;color:var(--navy2);line-height:1.6;margin-bottom:20px;}
+.warn-box{background:#FFF5F5;border:1px solid #FC8181;border-radius:10px;padding:14px 18px;font-size:13px;color:#9B2335;line-height:1.6;display:none;}
+
+/* RESULT */
+#view-result{display:none;align-items:center;justify-content:center;padding:40px 20px;background:linear-gradient(160deg,#0B1F35 0%,#1E5080 100%);min-height:calc(100vh - 70px);}
+#view-result.active{display:flex;flex-direction:column;}
+.result-card{background:var(--white);border-radius:24px;padding:40px 44px;max-width:680px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.result-card h2{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--navy);margin-bottom:6px;text-align:center;}
+.result-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:30px;}
+.score-display{text-align:center;margin-bottom:32px;}
+.score-circle{width:140px;height:140px;border-radius:50%;margin:0 auto 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--navy),var(--navy3));box-shadow:0 8px 32px rgba(11,31,53,.25);}
+.score-num{font-size:38px;font-weight:700;color:var(--gold2);font-family:'Cormorant Garamond',serif;line-height:1;}
+.score-max{font-size:12px;color:rgba(255,255,255,.5);}
+.score-badge{display:inline-block;padding:8px 24px;border-radius:20px;font-size:14px;font-weight:700;letter-spacing:.5px;}
+.badge-A{background:rgba(26,140,90,.15);color:var(--green);border:1.5px solid var(--green);}
+.badge-B{background:rgba(43,108,176,.12);color:#2C5282;border:1.5px solid #2B6CB0;}
+.badge-C{background:rgba(221,107,32,.12);color:#C05621;border:1.5px solid #DD6B20;}
+.badge-D{background:rgba(197,48,48,.12);color:var(--red);border:1.5px solid var(--red);}
+.unsur-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;}
+.unsur-card{background:var(--bg);border-radius:10px;padding:14px 16px;border:1px solid var(--border);}
+.u-label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;}
+.u-name{font-size:12px;color:var(--text);margin-bottom:8px;font-weight:500;}
+.unsur-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:4px;}
+.unsur-bar-fill{height:100%;border-radius:3px;transition:width 1s ease;}
+.u-val{font-size:13px;font-weight:700;color:var(--navy);text-align:right;}
+.btn-return{background:var(--navy);color:var(--white);border:none;padding:13px 32px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;width:100%;margin-top:4px;transition:all .2s;}
+.btn-return:hover{background:var(--navy2);}
+
+/* LOGIN MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal-overlay.open{display:flex;}
+.login-card{background:var(--white);border-radius:22px;padding:44px 40px;width:100%;max-width:400px;box-shadow:0 24px 60px rgba(0,0,0,.4);text-align:center;}
+.login-emblem{width:64px;height:64px;background:linear-gradient(135deg,var(--navy),var(--navy3));border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:20px;}
+.login-card h3{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.login-card p{font-size:13px;color:var(--muted);margin-bottom:28px;}
+.login-field{margin-bottom:16px;text-align:left;}
+.login-field label{font-size:12px;font-weight:700;color:var(--text);display:block;margin-bottom:6px;letter-spacing:.3px;}
+.login-field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:14px;color:var(--text);}
+.login-field input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,154,30,.12);}
+.btn-login{width:100%;background:var(--navy);color:var(--white);border:none;padding:14px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:6px;transition:all .2s;}
+.btn-login:hover{background:var(--navy2);}
+.login-err{background:#FFF5F5;border:1px solid #FC8181;border-radius:8px;padding:10px 14px;font-size:12px;color:#9B2335;margin-top:12px;display:none;}
+.btn-cancel{background:transparent;border:none;font-family:inherit;font-size:13px;color:var(--muted);cursor:pointer;margin-top:14px;display:block;width:100%;}
+.btn-cancel:hover{color:var(--text);}
+
+/* SUBMITTING OVERLAY */
+.submitting-overlay{position:fixed;inset:0;background:rgba(11,31,53,.75);z-index:800;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;color:white;}
+.submitting-overlay.open{display:flex;}
+.submitting-overlay p{font-size:15px;font-weight:500;}
+.spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--gold2);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* DASHBOARD */
+#view-dashboard{padding:32px 20px;}
+.dash-wrapper{max-width:1100px;margin:0 auto;}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.dash-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--navy);}
+.dash-sub{font-size:13px;color:var(--muted);margin-bottom:24px;}
+.dash-logout{background:transparent;border:1.5px solid var(--border);color:var(--muted);padding:7px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;}
+.dash-logout:hover{border-color:var(--red);color:var(--red);}
+.setup-banner{background:linear-gradient(135deg,#744210,#C05621);border-radius:var(--radius);padding:20px 24px;margin-bottom:20px;color:white;}
+.setup-banner h4{font-size:15px;font-weight:700;margin-bottom:6px;}
+.setup-banner p{font-size:12px;opacity:.85;line-height:1.6;}
+.setup-banner code{background:rgba(0,0,0,.25);padding:2px 6px;border-radius:4px;font-size:11px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px;}
+.kpi-card{background:var(--card);border-radius:var(--radius);padding:22px 24px;box-shadow:var(--shadow);border:1px solid rgba(196,154,30,.12);}
+.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:8px;}
+.kpi-val{font-size:34px;font-weight:700;color:var(--navy);font-family:'Cormorant Garamond',serif;line-height:1;margin-bottom:6px;}
+.kpi-s{font-size:12px;color:var(--muted);}
+.kpi-card.hl{background:linear-gradient(135deg,var(--navy),var(--navy3));}
+.kpi-card.hl .kpi-label,.kpi-card.hl .kpi-s{color:rgba(255,255,255,.6);}
+.kpi-card.hl .kpi-val{color:var(--gold2);}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+.chart-card{background:var(--card);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow);border:1px solid rgba(196,154,30,.10);}
+.chart-card.full{grid-column:1/-1;}
+.chart-card h3{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.chart-sub{font-size:12px;color:var(--muted);margin-bottom:20px;}
+.unsur-table{width:100%;border-collapse:collapse;font-size:13px;}
+.unsur-table th{background:var(--navy);color:var(--white);padding:10px 14px;text-align:left;font-size:12px;letter-spacing:.5px;}
+.unsur-table td{padding:10px 14px;border-bottom:1px solid var(--border);}
+.unsur-table tr:hover td{background:rgba(196,154,30,.06);}
+.bar-inline{display:flex;align-items:center;gap:8px;}
+.bar-mini{height:8px;border-radius:4px;min-width:4px;}
+.badge-tiny{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;}
+.ai-card{background:linear-gradient(135deg,var(--navy) 0%,#1A3A5C 100%);border-radius:var(--radius);padding:32px;box-shadow:var(--shadow);margin-bottom:24px;}
+.ai-card h3{font-size:18px;font-weight:700;color:var(--gold2);margin-bottom:8px;}
+.ai-sub{font-size:13px;color:rgba(255,255,255,.55);margin-bottom:20px;}
+.ai-content{font-size:14px;color:rgba(255,255,255,.85);line-height:1.75;white-space:pre-wrap;}
+.ai-loading{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.6);font-size:14px;}
+.btn-ai{background:linear-gradient(135deg,var(--gold),var(--gold3));color:var(--navy);border:none;padding:12px 28px;border-radius:10px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .25s;margin-top:16px;}
+.btn-ai:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(196,154,30,.4);}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty-icon{font-size:48px;margin-bottom:16px;}
+
+@media(max-width:640px){
+  .section-card,.result-card,.login-card{padding:22px 18px;}
+  .chart-grid{grid-template-columns:1fr;}
+  .unsur-grid{grid-template-columns:1fr;}
+  .likert-btn{min-width:80px;font-size:11px;}
+  .welcome-card{padding:36px 24px;}
+}
+</style>
+</head>
+<body>
+
+<script>
+/* ═══ KONFIGURASI — EDIT BAGIAN INI SEBELUM DEPLOY ═══ */
+const CONFIG = {
+  // Tempel URL Google Apps Script Anda di sini setelah deploy
+  // Contoh: 'https://script.google.com/macros/s/AKfycbxXXXXX/exec'
+  SCRIPT_URL: '',
+
+  // Kredensial admin (dapat diubah sesuai kebutuhan)
+  ADMIN_USER: 'admin',
+  ADMIN_PASS: 'admin12345'
+};
+</script>
+
+<div id="progress-bar"></div>
+
+<header class="page-header">
+  <div class="brand">
+    <div class="brand-badge">K</div>
+    <div class="brand-text">
+      <h1>BPSDMP – Kementerian Perdagangan</h1>
+      <p>Survei Kepuasan Masyarakat 2026</p>
+    </div>
+  </div>
+  <div class="header-nav">
+    <button class="btn-nav active" id="nav-home" onclick="goHome()">Beranda</button>
+    <button class="btn-nav" id="nav-dash" onclick="openDashboard()">📊 Dashboard Admin</button>
+  </div>
+</header>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="login-modal">
+  <div class="login-card">
+    <div class="login-emblem">🔐</div>
+    <h3>Dashboard Admin</h3>
+    <p>Masukkan kredensial untuk mengakses dashboard SKM.</p>
+    <div class="login-field">
+      <label>USERNAME</label>
+      <input type="text" id="inp-user" placeholder="Username" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label>PASSWORD</label>
+      <input type="password" id="inp-pass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn-login" onclick="doLogin()">Masuk →</button>
+    <div class="login-err" id="login-err">Username atau password salah.</div>
+    <button class="btn-cancel" onclick="closeLogin()">Batal</button>
+  </div>
+</div>
+
+<!-- SUBMITTING -->
+<div class="submitting-overlay" id="submitting-overlay">
+  <div class="spinner"></div>
+  <p>Menyimpan jawaban Anda...</p>
+</div>
+
+<!-- ═══ WELCOME ═══ -->
+<div class="view" id="view-welcome">
+  <div class="welcome-card">
+    <div class="welcome-emblem">S</div>
+    <div class="welcome-subtitle">Kepmendag No. 707 Tahun 2026</div>
+    <h2>Survei Kepuasan Masyarakat<br>Layanan BPSDMP</h2>
+    <p>Badan Pengembangan Sumber Daya Manusia Perdagangan mengundang Saudara berpartisipasi dalam Survei Kepuasan Masyarakat guna meningkatkan kualitas layanan publik secara berkelanjutan.</p>
+    <div class="welcome-meta">
+      <div class="meta-pill">⏱ ±7 menit</div>
+      <div class="meta-pill">🔒 Rahasia &amp; terjaga</div>
+      <div class="meta-pill">📋 16–19 pertanyaan</div>
+    </div>
+    <button class="btn-start" onclick="startSurvey()">Mulai Mengisi Survei →</button>
+  </div>
+</div>
+
+<!-- ═══ FORM ═══ -->
+<div class="view" id="view-form">
+  <div class="form-wrapper">
+    <div class="step-indicator" id="step-dots"></div>
+
+    <!-- STEP 0: Persetujuan -->
+    <div class="form-step" id="step-0">
+      <div class="section-card">
+        <div class="section-title"><span>📋</span> Persetujuan Responden</div>
+        <div class="section-sub">Mohon baca pernyataan berikut sebelum memulai pengisian survei.</div>
+        <div class="notice-box">Survei ini ditujukan kepada pengguna layanan <strong>eksternal</strong> yang pernah menerima layanan, mengikuti kegiatan, memperoleh fasilitasi, atau berinteraksi dengan unit layanan di lingkungan BPSDMP Kementerian Perdagangan. Jawaban Saudara bersifat rahasia dan hanya digunakan untuk keperluan evaluasi serta peningkatan kualitas pelayanan publik.</div>
+        <div class="field-group">
+          <label class="field-label">Apakah Saudara bersedia mengisi survei ini secara objektif? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-pill" id="pill-c-ya" onclick="selectR('consent','ya','pill-c-ya')"><input type="radio" name="consent" value="ya"> ✅ Ya, bersedia</label>
+            <label class="radio-pill" id="pill-c-tidak" onclick="selectR('consent','tidak','pill-c-tidak')"><input type="radio" name="consent" value="tidak"> ❌ Tidak bersedia</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-nav"><span></span><button class="btn-next" onclick="nextStep(0)">Lanjutkan →</button></div>
+    </div>
+
+    <!-- STEP 1: Unit & Metode (tanpa nama kegiatan & tanggal) -->
+    <div class="form-step" id="step-1">
+      <div class="section-card">
+        <div class="section-title"><span>🏛️</span> Profil Responden – Unit Layanan</div>
+        <div class="section-sub">Informasi ini digunakan untuk mengklasifikasikan data per unit layanan.</div>
+        <div class="field-group">
+          <label class="field-label">Unit layanan BPSDMP yang Saudara nilai <span class="req">*</span></label>
+          <select id="f-unit">
+            <option value="">-- Pilih unit layanan --</option>
+            <option>Pusat Pengembangan Kompetensi Aparatur Perdagangan</option>
+            <option>Pusat Pengembangan SDM Ekspor dan Jasa Perdagangan</option>
+            <option>Pusat Pembinaan Jabatan Fungsional Perdagangan</option>
+            <option>Balai Pelatihan Aparatur Perdagangan Yogyakarta</option>
+            <option>Balai Pelatihan Aparatur Perdagangan Makassar</option>
+            <option>Balai Pelatihan Aparatur Perdagangan Padang</option>
+            <option>Balai Pelatihan Aparatur Metrologi dan Mutu</option>
+            <option>Balai Pelatihan SDM Metrologi, Mutu, dan Jasa Perdagangan</option>
+            <option>Akademi Metrologi dan Instrumentasi</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Jenis layanan yang Saudara terima <span class="req">*</span></label>
+          <select id="f-jenis">
+            <option value="">-- Pilih jenis layanan --</option>
+            <option>Pelatihan/pengembangan kompetensi aparatur perdagangan</option>
+            <option>Pelatihan/pengembangan SDM ekspor</option>
+            <option>Pelatihan/pengembangan SDM metrologi, mutu, dan jasa perdagangan</option>
+            <option>Pendidikan/layanan akademik</option>
+            <option>Uji kompetensi Jabatan Fungsional Perdagangan</option>
+            <option>Pembinaan Jabatan Fungsional Perdagangan</option>
+            <option>Rekomendasi formasi Jabatan Fungsional Perdagangan</option>
+            <option>Layanan konsultasi/pendampingan</option>
+            <option>Layanan informasi/helpdesk/pengaduan</option>
+            <option>Kerja sama/koordinasi program</option>
+            <option>Lainnya</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Metode layanan yang diterima <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-pill" id="pill-luring" onclick="selectR('metode','Luring/tatap muka','pill-luring')"><input type="radio" name="metode" value="Luring/tatap muka"> 🏢 Luring / Tatap Muka</label>
+            <label class="radio-pill" id="pill-daring" onclick="selectR('metode','Daring/online','pill-daring')"><input type="radio" name="metode" value="Daring/online"> 💻 Daring / Online</label>
+            <label class="radio-pill" id="pill-hybrid" onclick="selectR('metode','Hybrid/campuran','pill-hybrid')"><input type="radio" name="metode" value="Hybrid/campuran"> 🔀 Hybrid / Campuran</label>
+          </div>
+        </div>
+      </div>
+      <div class="form-nav">
+        <button class="btn-back" onclick="prevStep(1)">← Kembali</button>
+        <button class="btn-next" onclick="nextStep(1)">Lanjutkan →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Data Diri (tanpa kolom pekerjaan) -->
+    <div class="form-step" id="step-2">
+      <div class="section-card">
+        <div class="section-title"><span>👤</span> Profil Responden – Data Diri</div>
+        <div class="section-sub">Data berikut digunakan untuk analisis demografi responden survei.</div>
+        <div class="field-group">
+          <label class="field-label">Jenis kelamin <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-pill" id="pill-jk-l" onclick="selectR('jk','Laki-laki','pill-jk-l')"><input type="radio" name="jk" value="Laki-laki"> ♂ Laki-laki</label>
+            <label class="radio-pill" id="pill-jk-p" onclick="selectR('jk','Perempuan','pill-jk-p')"><input type="radio" name="jk" value="Perempuan"> ♀ Perempuan</label>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Usia <span class="req">*</span></label>
+          <select id="f-usia">
+            <option value="">-- Pilih kelompok usia --</option>
+            <option>&lt;17 tahun</option><option>17–25 tahun</option><option>26–34 tahun</option>
+            <option>35–44 tahun</option><option>45–54 tahun</option><option>55–65 tahun</option><option>&gt;65 tahun</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Pendidikan terakhir <span class="req">*</span></label>
+          <select id="f-pendidikan">
+            <option value="">-- Pilih pendidikan --</option>
+            <option>Tidak sekolah</option><option>SD/sederajat</option><option>SMP/sederajat</option>
+            <option>SMA/sederajat</option><option>D1/D2/D3</option><option>D4/S1</option><option>S2</option><option>S3</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Penyandang/pendamping disabilitas? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-pill" id="pill-dis-t" onclick="selectR('dis','Tidak','pill-dis-t');toggleEl('dis-detail',false)"><input type="radio" name="dis" value="Tidak"> Tidak</label>
+            <label class="radio-pill" id="pill-dis-y" onclick="selectR('dis','Ya','pill-dis-y');toggleEl('dis-detail',true)"><input type="radio" name="dis" value="Ya"> Ya</label>
+          </div>
+        </div>
+        <div class="field-group" id="dis-detail" style="display:none">
+          <label class="field-label">Jenis disabilitas</label>
+          <select id="f-jenis-dis">
+            <option value="">-- Pilih jenis --</option>
+            <option>Disabilitas fisik</option><option>Disabilitas intelektual</option>
+            <option>Disabilitas mental</option><option>Disabilitas sensorik</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Nama instansi/organisasi/perusahaan <span class="req">*</span></label>
+          <input type="text" id="f-instansi" placeholder="Nama instansi Saudara">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Nomor WhatsApp / email <span style="font-weight:400;color:var(--muted)">(untuk validasi, tidak dipublikasikan)</span></label>
+          <input type="text" id="f-kontak" placeholder="081234567890 atau nama@email.com">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Apakah Saudara pegawai internal BPSDMP? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-pill" id="pill-int-t" onclick="selectR('int','Tidak','pill-int-t');toggleEl('int-warn',false)"><input type="radio" name="int" value="Tidak"> Tidak</label>
+            <label class="radio-pill" id="pill-int-y" onclick="selectR('int','Ya','pill-int-y');toggleEl('int-warn',true)"><input type="radio" name="int" value="Ya"> Ya (pegawai BPSDMP)</label>
+          </div>
+        </div>
+        <div class="warn-box" id="int-warn">Perhatian: Data pegawai internal BPSDMP tidak dihitung sebagai responden eksternal dalam SKM. Saudara tetap dapat melanjutkan, namun data akan ditandai sebagai responden internal.</div>
+      </div>
+      <div class="form-nav">
+        <button class="btn-back" onclick="prevStep(2)">← Kembali</button>
+        <button class="btn-next" onclick="nextStep(2)">Lanjutkan →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Q1–Q10 -->
+    <div class="form-step" id="step-3">
+      <div class="section-card">
+        <div class="section-title"><span>📝</span> Penilaian Layanan – Bagian 1</div>
+        <div class="section-sub">Berikan penilaian sesuai pengalaman menerima layanan BPSDMP. (1=Sangat Tidak Setuju/Sesuai · 4=Sangat Setuju/Sesuai)</div>
+        <div id="q-blk-1"></div>
+      </div>
+      <div class="form-nav">
+        <button class="btn-back" onclick="prevStep(3)">← Kembali</button>
+        <button class="btn-next" onclick="nextStep(3)">Lanjutkan →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: Conditional -->
+    <div class="form-step" id="step-4">
+      <div class="section-card">
+        <div class="section-title"><span>🎯</span> Penilaian Layanan – Bagian 2</div>
+        <div class="section-sub" id="step4-sub">Pertanyaan berdasarkan metode layanan yang diterima.</div>
+        <div id="q-blk-cond"></div>
+      </div>
+      <div class="form-nav">
+        <button class="btn-back" onclick="prevStep(4)">← Kembali</button>
+        <button class="btn-next" onclick="nextStep(4)">Lanjutkan →</button>
+      </div>
+    </div>
+
+    <!-- STEP 5: Q13–Q15 + Saran -->
+    <div class="form-step" id="step-5">
+      <div class="section-card">
+        <div class="section-title"><span>✅</span> Penilaian Layanan – Bagian 3 &amp; Saran</div>
+        <div class="section-sub">Tiga pertanyaan penutup, kritik, dan harapan Saudara.</div>
+        <div id="q-blk-2"></div>
+        <div style="margin-top:28px;padding-top:28px;border-top:1px solid var(--border)">
+          <div class="field-group">
+            <label class="field-label">Kritik dan saran untuk perbaikan layanan BPSDMP</label>
+            <textarea id="f-kritik" placeholder="Tuliskan kritik dan saran Saudara..."></textarea>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Harapan Saudara untuk peningkatan layanan BPSDMP</label>
+            <textarea id="f-harapan" placeholder="Tuliskan harapan Saudara..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="form-nav">
+        <button class="btn-back" onclick="prevStep(5)">← Kembali</button>
+        <button class="btn-submit" onclick="submitSurvey()">Kirim Survei ✓</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RESULT ═══ -->
+<div class="view" id="view-result">
+  <div class="result-card">
+    <h2>Terima Kasih! 🎉</h2>
+    <p class="result-sub">Jawaban Saudara telah berhasil disimpan. Berikut gambaran penilaian Saudara.</p>
+    <div class="score-display">
+      <div class="score-circle">
+        <span class="score-num" id="res-score">–</span>
+        <span class="score-max">/100</span>
+      </div>
+      <div style="margin-top:12px"><span class="score-badge" id="res-badge">–</span></div>
+      <p style="margin-top:10px;font-size:13px;color:var(--muted)" id="res-mutu">–</p>
+    </div>
+    <div class="unsur-grid" id="res-grid"></div>
+    <p style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:20px">Nilai SKM final dihitung dari agregat seluruh responden valid.</p>
+    <button class="btn-return" onclick="goHome()">← Kembali ke Halaman Utama</button>
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div class="view" id="view-dashboard">
+  <div class="dash-wrapper">
+    <div class="dash-header">
+      <div class="dash-title">Dashboard SKM BPSDMP 2026</div>
+      <button class="dash-logout" onclick="logoutAdmin()">🔓 Keluar</button>
+    </div>
+    <div class="dash-sub" id="dash-sub">Memuat data...</div>
+    <div id="setup-warn" style="display:none">
+      <div class="setup-banner">
+        <h4>⚠️ Google Sheets Belum Dikonfigurasi</h4>
+        <p>Data hanya tersimpan di browser ini. Agar data dari semua responden terkumpul, ikuti panduan di komentar bagian atas file HTML, lalu isi <code>CONFIG.SCRIPT_URL</code>.</p>
+      </div>
+    </div>
+    <div id="dash-empty" class="empty-state" style="display:none">
+      <div class="empty-icon">📭</div>
+      <p>Belum ada data survei yang masuk.<br>Sebarkan link survei terlebih dahulu.</p>
+    </div>
+    <div id="dash-content" style="display:none">
+      <div class="kpi-grid" id="kpi-grid"></div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>Radar 9 Unsur SKM</h3>
+          <p class="chart-sub">Nilai Rata-rata Tertimbang per unsur (skala 1–4)</p>
+          <div style="height:280px"><canvas id="chart-radar"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Nilai SKM per Unit Layanan</h3>
+          <p class="chart-sub">Konversi nilai indeks ke skala 25–100</p>
+          <div style="height:280px"><canvas id="chart-unit"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Jenis Kelamin Responden</h3>
+          <p class="chart-sub">Distribusi gender responden valid</p>
+          <div style="height:240px"><canvas id="chart-gender"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Metode Layanan</h3>
+          <p class="chart-sub">Distribusi luring / daring / hybrid</p>
+          <div style="height:240px"><canvas id="chart-metode"></canvas></div>
+        </div>
+        <div class="chart-card full">
+          <h3>Tabel Detail Nilai Per Unsur SKM</h3>
+          <p class="chart-sub">Nilai Rata-rata Tertimbang (NRR) dan konversi ke skala 25–100</p>
+          <table class="unsur-table" id="unsur-table"></table>
+        </div>
+      </div>
+      <div class="ai-card">
+        <h3>🤖 Analisis &amp; Rekomendasi AI</h3>
+        <p class="ai-sub">Rekomendasi tindak lanjut dari Claude AI berdasarkan data SKM yang terkumpul.</p>
+        <div id="ai-output">
+          <p style="color:rgba(255,255,255,.55);font-size:13px">Klik tombol di bawah untuk mendapatkan analisis dan rekomendasi perbaikan layanan.</p>
+          <button class="btn-ai" onclick="getAI()">✨ Generate Rekomendasi AI</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA PERTANYAAN
+// ═══════════════════════════════════════════
+const Q1=[
+  {id:'q1',n:'01',t:'Informasi pelayanan BPSDMP tersedia melalui media elektronik maupun nonelektronik.',o:['Sangat Tidak Setuju','Tidak Setuju','Setuju','Sangat Setuju']},
+  {id:'q2',n:'02',t:'Persyaratan layanan BPSDMP sesuai dengan informasi yang diberikan.',o:['Sangat Tidak Sesuai','Tidak Sesuai','Sesuai','Sangat Sesuai']},
+  {id:'q3',n:'03',t:'Standar dan prosedur layanan BPSDMP diinformasikan dengan jelas.',o:['Sangat Tidak Setuju','Tidak Setuju','Setuju','Sangat Setuju']},
+  {id:'q4',n:'04',t:'Prosedur/alur layanan BPSDMP mudah dipahami dan dilakukan.',o:['Sangat Tidak Setuju','Tidak Setuju','Setuju','Sangat Setuju']},
+  {id:'q5',n:'05',t:'Layanan BPSDMP diberikan sesuai prosedur tanpa kecurangan.',o:['Sangat Tidak Setuju','Tidak Setuju','Setuju','Sangat Setuju']},
+  {id:'q6',n:'06',t:'Jangka waktu layanan/kegiatan BPSDMP sesuai dengan yang diinformasikan.',o:['Sangat Tidak Sesuai','Tidak Sesuai','Sesuai','Sangat Sesuai']},
+  {id:'q7',n:'07',t:'Biaya/tarif layanan BPSDMP sesuai dengan yang diinformasikan. Jika gratis, informasi tersebut disampaikan dengan jelas.',o:['Sangat Tidak Sesuai','Tidak Sesuai','Sesuai','Sangat Sesuai']},
+  {id:'q8',n:'08',t:'Tidak ada pungutan liar dalam pelayanan BPSDMP.',o:['Sangat Tidak Setuju','Tidak Setuju','Setuju','Sangat Setuju']},
+  {id:'q9',n:'09',t:'Tidak ada percaloan/perantara tidak resmi dalam pelayanan BPSDMP.',o:['Sangat Tidak Setuju','Tidak Setuju','Setuju','Sangat Setuju']},
+  {id:'q10',n:'10',t:'Produk layanan yang diterima sesuai yang dipublikasikan (sertifikat, rekomendasi, materi, fasilitasi, atau hasil layanan lainnya).',o:['Sangat Tidak Sesuai','Tidak Sesuai','Sesuai','Sangat Sesuai']},
+];
+const QL=[
+  {id:'q11a',n:'11a',t:'Petugas, narasumber, fasilitator, asesor, dosen, instruktur, atau pengelola layanan BPSDMP merespon kebutuhan dengan cepat.',o:['Sangat Tidak Setuju','Tidak Setuju','Setuju','Sangat Setuju']},
+  {id:'q12a',n:'12a',t:'Petugas/pelaksana layanan BPSDMP melayani dengan ramah, sopan, dan profesional.',o:['Sangat Tidak Setuju','Tidak Setuju','Setuju','Sangat Setuju']},
+  {id:'q16a',n:'16a',t:'Sarana dan prasarana BPSDMP (ruang layanan, kelas, laboratorium, asrama, fasilitas pendukung) nyaman dan mudah digunakan.',o:['Sangat Tidak Setuju','Tidak Setuju','Setuju','Sangat Setuju']},
+];
+const QD=[
+  {id:'q11b',n:'11b',t:'Aplikasi/sistem/kanal layanan online BPSDMP merespon dengan cepat (membuka halaman, pencarian, unduh, unggah, akses layanan).',o:['Sangat Tidak Cepat','Tidak Cepat','Cepat','Sangat Cepat']},
+  {id:'q12b',n:'12b',t:'Fitur pada aplikasi/sistem/kanal layanan online BPSDMP mudah digunakan.',o:['Sangat Tidak Setuju','Tidak Setuju','Setuju','Sangat Setuju']},
+  {id:'q16b',n:'16b',t:'Sistem layanan online BPSDMP nyaman dan mudah digunakan.',o:['Sangat Tidak Setuju','Tidak Setuju','Setuju','Sangat Setuju']},
+];
+const Q2=[
+  {id:'q13',n:'13',t:'Seluruh pengguna layanan BPSDMP dilayani secara adil tanpa diskriminasi.',o:['Sangat Tidak Setuju','Tidak Setuju','Setuju','Sangat Setuju']},
+  {id:'q14',n:'14',t:'Pelayanan BPSDMP diberikan tanpa imbalan uang, barang, atau fasilitas di luar aturan.',o:['Sangat Tidak Setuju','Tidak Setuju','Setuju','Sangat Setuju']},
+  {id:'q15',n:'15',t:'Layanan konsultasi dan pengaduan BPSDMP mudah diakses.',o:['Sangat Tidak Setuju','Tidak Setuju','Setuju','Sangat Setuju']},
+];
+const UN={u1:'Persyaratan',u2:'Sistem, Mekanisme & Prosedur',u3:'Waktu Penyelesaian',u4:'Biaya/Tarif',u5:'Produk Layanan',u6:'Kompetensi Pelaksana',u7:'Perilaku Pelaksana',u8:'Penanganan Pengaduan',u9:'Sarana & Prasarana'};
+
+const STEPS=6;
+let step=0, fd={}, rd={}, adminIn=false;
+
+// ═══════════════════════════════════════════
+// NAVIGASI & VIEWS
+// ═══════════════════════════════════════════
+function showView(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.btn-nav').forEach(b=>b.classList.remove('active'));
+  document.getElementById(v==='dashboard'?'nav-dash':'nav-home').classList.add('active');
+  window.scrollTo(0,0);
+}
+function goHome(){showView('welcome');}
+function startSurvey(){resetForm();showView('form');goto(0);}
+function goto(s){
+  document.querySelectorAll('.form-step').forEach(e=>e.classList.remove('active'));
+  document.getElementById('step-'+s).classList.add('active');
+  step=s;
+  document.getElementById('progress-bar').style.width=((s/(STEPS-1))*100)+'%';
+  const labs=['Persetujuan','Unit Layanan','Data Diri','Penilaian I','Penilaian II','Penilaian III & Saran'];
+  const c=document.getElementById('step-dots'); c.innerHTML='';
+  for(let i=0;i<STEPS;i++){const d=document.createElement('div');d.className='step-dot'+(i<s?' done':i===s?' active':'');c.appendChild(d);}
+  const l=document.createElement('span');l.className='step-label';l.textContent=`Langkah ${s+1}/${STEPS}: ${labs[s]}`;c.appendChild(l);
+  window.scrollTo(0,0);
+}
+function nextStep(f){if(validateStep(f))goto(f+1);}
+function prevStep(f){goto(f-1);}
+function toggleEl(id,show){document.getElementById(id).style.display=show?'block':'none';}
+
+// ═══════════════════════════════════════════
+// ADMIN LOGIN
+// ═══════════════════════════════════════════
+function openDashboard(){
+  if(adminIn){showView('dashboard');renderDash();return;}
+  document.getElementById('login-modal').classList.add('open');
+  document.getElementById('inp-user').value='';
+  document.getElementById('inp-pass').value='';
+  document.getElementById('login-err').style.display='none';
+  setTimeout(()=>document.getElementById('inp-user').focus(),100);
+}
+function closeLogin(){document.getElementById('login-modal').classList.remove('open');}
+function doLogin(){
+  const u=document.getElementById('inp-user').value.trim();
+  const p=document.getElementById('inp-pass').value;
+  if(u===CONFIG.ADMIN_USER&&p===CONFIG.ADMIN_PASS){
+    adminIn=true; closeLogin(); showView('dashboard'); renderDash();
+  } else {
+    document.getElementById('login-err').style.display='block';
+    document.getElementById('inp-pass').value='';
+    document.getElementById('inp-pass').focus();
+  }
+}
+function logoutAdmin(){adminIn=false;goHome();}
+
+// ═══════════════════════════════════════════
+// FORM LOGIC
+// ═══════════════════════════════════════════
+function selectR(name,val,pid){
+  rd[name]=val;
+  document.querySelectorAll(`input[name="${name}"]`).forEach(r=>r.closest('.radio-pill')?.classList.remove('selected'));
+  document.getElementById(pid)?.classList.add('selected');
+}
+function validateStep(s){
+  if(s===0){
+    if(!rd['consent']){alert('Mohon berikan jawaban persetujuan.');return false;}
+    // [CATATAN 1] Tidak bersedia → kembali ke beranda
+    if(rd['consent']==='tidak'){showView('welcome');return false;}
+    return true;
+  }
+  if(s===1){
+    if(!document.getElementById('f-unit').value){alert('Mohon pilih unit layanan.');return false;}
+    if(!document.getElementById('f-jenis').value){alert('Mohon pilih jenis layanan.');return false;}
+    if(!rd['metode']){alert('Mohon pilih metode layanan.');return false;}
+    buildCond(); return true;
+  }
+  if(s===2){
+    if(!rd['jk']){alert('Mohon pilih jenis kelamin.');return false;}
+    if(!document.getElementById('f-usia').value){alert('Mohon pilih usia.');return false;}
+    if(!document.getElementById('f-pendidikan').value){alert('Mohon pilih pendidikan.');return false;}
+    if(!rd['dis']){alert('Mohon jawab pertanyaan disabilitas.');return false;}
+    if(!document.getElementById('f-instansi').value.trim()){alert('Mohon isi nama instansi.');return false;}
+    if(!rd['int']){alert('Mohon jawab pertanyaan pegawai internal.');return false;}
+    return true;
+  }
+  if(s===3)return chkQ(Q1);
+  if(s===4){const m=rd['metode'];return chkQ(m==='Luring/tatap muka'?QL:m==='Daring/online'?QD:[...QL,...QD]);}
+  return true;
+}
+function chkQ(qs){for(const q of qs){if(!fd[q.id]){alert(`Mohon jawab pertanyaan No. ${q.n}.`);return false;}}return true;}
+function buildQ(cid,qs){
+  const el=document.getElementById(cid);el.innerHTML='';
+  qs.forEach(q=>{
+    const d=document.createElement('div');d.className='q-block';
+    d.innerHTML=`<div class="q-num">No. ${q.n}</div><div class="q-text">${q.t}</div><div class="likert-wrap">${q.o.map((o,i)=>`<div class="likert-btn ${fd[q.id]===i+1?'sel-'+(i+1):''}" onclick="selL('${q.id}',${i+1},this)"><span class="likert-val">${i+1}</span>${o}</div>`).join('')}</div>`;
+    el.appendChild(d);
+  });
+}
+function buildCond(){
+  const m=rd['metode'];let qs,sub;
+  if(m==='Luring/tatap muka'){qs=QL;sub='Pertanyaan khusus layanan luring/tatap muka.';}
+  else if(m==='Daring/online'){qs=QD;sub='Pertanyaan khusus layanan daring/online.';}
+  else{qs=[...QL,...QD];sub='Pertanyaan layanan hybrid (luring & daring).';}
+  document.getElementById('step4-sub').textContent=sub;
+  buildQ('q-blk-cond',qs);
+}
+function selL(id,val,el){
+  fd[id]=val;
+  el.closest('.likert-wrap').querySelectorAll('.likert-btn').forEach((b,i)=>{b.className='likert-btn'+(fd[id]===i+1?' sel-'+(i+1):'');});
+}
+function resetForm(){
+  fd={};rd={};
+  document.querySelectorAll('.radio-pill').forEach(p=>p.classList.remove('selected'));
+  document.querySelectorAll('select').forEach(s=>s.value='');
+  document.querySelectorAll('input[type=text],textarea').forEach(i=>i.value='');
+  toggleEl('int-warn',false);toggleEl('dis-detail',false);
+  buildQ('q-blk-1',Q1);buildQ('q-blk-2',Q2);
+}
+
+// ═══════════════════════════════════════════
+// KALKULASI SKM
+// ═══════════════════════════════════════════
+function av(a){const v=a.filter(x=>x!==null&&x!==undefined&&!isNaN(x));return v.length?v.reduce((s,x)=>s+x,0)/v.length:null;}
+function calcSKM(f,m){
+  const u1=av([f.q1,f.q2]),u2=av([f.q3,f.q4,f.q5,f.q9]),u3=f.q6||null,u4=av([f.q7,f.q8,f.q14]),u5=f.q10||null;
+  let u6,u7,u9;
+  if(m==='Luring/tatap muka'){u6=f.q11a||null;u7=av([f.q12a,f.q13]);u9=f.q16a||null;}
+  else if(m==='Daring/online'){u6=f.q11b||null;u7=av([f.q12b,f.q13]);u9=f.q16b||null;}
+  else{u6=av([f.q11a,f.q11b]);u7=av([f.q12a,f.q12b,f.q13]);u9=av([f.q16a,f.q16b]);}
+  const u8=f.q15||null;
+  const idx=av([u1,u2,u3,u4,u5,u6,u7,u8,u9].filter(v=>v!==null));
+  const skm=+(idx*25).toFixed(2);
+  const mu=skm>=88.31?{m:'A',k:'Sangat Baik',c:'badge-A'}:skm>=76.61?{m:'B',k:'Baik',c:'badge-B'}:skm>=65?{m:'C',k:'Kurang Baik',c:'badge-C'}:{m:'D',k:'Tidak Baik',c:'badge-D'};
+  return{u1,u2,u3,u4,u5,u6,u7,u8,u9,nilaiIndeks:+idx.toFixed(4),nilaiSKM:skm,mutu:mu};
+}
+function bc(v){if(!v)return'#CBD5E0';const p=(v-1)/3;return p<0.33?'#E53E3E':p<0.66?'#DD6B20':p<0.85?'#2F855A':'#2B6CB0';}
+
+// ═══════════════════════════════════════════
+// SUBMIT
+// ═══════════════════════════════════════════
+async function submitSurvey(){
+  if(!chkQ(Q2))return;
+  const m=rd['metode'],skm=calcSKM(fd,m);
+  const rec={ts:Date.now(),unit:g('f-unit'),jenisLayanan:g('f-jenis'),metode:m,jk:rd['jk'],usia:g('f-usia'),pendidikan:g('f-pendidikan'),disabilitas:rd['dis'],instansi:g('f-instansi'),kontak:g('f-kontak'),internal:rd['int'],kritik:g('f-kritik'),harapan:g('f-harapan'),responses:{...fd},skm};
+  document.getElementById('submitting-overlay').classList.add('open');
+  await saveRec(rec);
+  document.getElementById('submitting-overlay').classList.remove('open');
+  showResult(skm);
+}
+function g(id){const e=document.getElementById(id);return e?e.value||'':'';}
+function showResult(skm){
+  document.getElementById('res-score').textContent=skm.nilaiSKM.toFixed(2);
+  const b=document.getElementById('res-badge');b.textContent=`Mutu ${skm.mutu.m} – ${skm.mutu.k}`;b.className='score-badge '+skm.mutu.c;
+  document.getElementById('res-mutu').textContent=`Kinerja Unit Pelayanan: ${skm.mutu.k}`;
+  const grid=document.getElementById('res-grid');grid.innerHTML='';
+  Object.keys(UN).forEach(uk=>{
+    const val=skm[uk],pct=val?((val-1)/3*100):0;
+    const d=document.createElement('div');d.className='unsur-card';
+    d.innerHTML=`<div class="u-label">${uk.toUpperCase()}</div><div class="u-name">${UN[uk]}</div><div class="unsur-bar"><div class="unsur-bar-fill" style="width:0%;background:${bc(val)}" data-p="${pct}"></div></div><div class="u-val">${val?val.toFixed(2):'–'}</div>`;
+    grid.appendChild(d);
+  });
+  showView('result');
+  setTimeout(()=>document.querySelectorAll('.unsur-bar-fill').forEach(b=>{b.style.width=b.dataset.p+'%';}),200);
+}
+
+// ═══════════════════════════════════════════
+// PENYIMPANAN 3 LAPISAN
+// ═══════════════════════════════════════════
+async function saveRec(rec){
+  // Lapisan 3: localStorage (selalu)
+  try{const a=JSON.parse(localStorage.getItem('skm26')||'[]');a.push(rec);localStorage.setItem('skm26',JSON.stringify(a));}catch(e){}
+  // Lapisan 2: window.storage (Claude)
+  try{let a=[];try{const r=await window.storage.get('skm-records');a=r?JSON.parse(r.value):[]}catch(e){}; a.push(rec);await window.storage.set('skm-records',JSON.stringify(a));}catch(e){}
+  // Lapisan 1: Google Apps Script (jika dikonfigurasi)
+  if(CONFIG.SCRIPT_URL){
+    try{await fetch(CONFIG.SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(rec)});}catch(e){console.warn('Apps Script err:',e);}
+  }
+}
+async function loadRecs(){
+  if(CONFIG.SCRIPT_URL){
+    try{const r=await fetch(CONFIG.SCRIPT_URL+'?action=getAll');const d=await r.json();if(d.records?.length>0)return d.records;}catch(e){}
+  }
+  try{const r=await window.storage.get('skm-records');if(r){const d=JSON.parse(r.value);if(d.length>0)return d;}}catch(e){}
+  try{return JSON.parse(localStorage.getItem('skm26')||'[]');}catch(e){return[];}
+}
+
+// ═══════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════
+let chs={};
+async function renderDash(){
+  document.getElementById('dash-sub').textContent='Memuat data...';
+  const recs=await loadRecs();
+  const valid=recs.filter(r=>r.internal!=='Ya');
+  document.getElementById('setup-warn').style.display=CONFIG.SCRIPT_URL?'none':'block';
+  if(!valid.length){
+    document.getElementById('dash-empty').style.display='block';
+    document.getElementById('dash-content').style.display='none';
+    document.getElementById('dash-sub').textContent='Belum ada data.';
+    return;
+  }
+  document.getElementById('dash-empty').style.display='none';
+  document.getElementById('dash-content').style.display='block';
+  document.getElementById('dash-sub').textContent=`Data per ${new Date().toLocaleString('id-ID')} · ${valid.length} responden valid`;
+
+  const avgSKM=av(valid.map(r=>r.skm.nilaiSKM));
+  const avgIdx=av(valid.map(r=>r.skm.nilaiIndeks));
+  const mutu=avgSKM>=88.31?'A – Sangat Baik':avgSKM>=76.61?'B – Baik':avgSKM>=65?'C – Kurang Baik':'D – Tidak Baik';
+
+  document.getElementById('kpi-grid').innerHTML=`
+    <div class="kpi-card hl"><div class="kpi-label">Nilai SKM</div><div class="kpi-val">${avgSKM.toFixed(2)}</div><div class="kpi-s">Mutu: ${mutu}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Responden Valid</div><div class="kpi-val">${valid.length}</div><div class="kpi-s">Total masuk (incl. internal): ${recs.length}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Nilai Indeks</div><div class="kpi-val">${avgIdx.toFixed(4)}</div><div class="kpi-s">Skala 1–4</div></div>
+    <div class="kpi-card"><div class="kpi-label">Unit Layanan</div><div class="kpi-val">${new Set(valid.map(r=>r.unit)).size}</div><div class="kpi-s">dari 9 unit BPSDMP</div></div>`;
+
+  const ua={};
+  Object.keys(UN).forEach(uk=>{const v=valid.map(r=>r.skm[uk]).filter(x=>x!==null&&x!==undefined);ua[uk]=v.length?av(v):null;});
+
+  const tbl=document.getElementById('unsur-table');
+  tbl.innerHTML='<tr><th>Unsur</th><th>Nama</th><th>NRR (1–4)</th><th>Nilai Konversi</th><th>Mutu</th></tr>';
+  Object.entries(UN).forEach(([uk,name])=>{
+    const v=ua[uk];const conv=v?(v*25).toFixed(2):'–';
+    const m=v?v*25>=88.31?'A':v*25>=76.61?'B':v*25>=65?'C':'D':'–';
+    const bw=v?((v-1)/3*80).toFixed(0):0;
+    const cls=`badge-${m}`;
+    tbl.innerHTML+=`<tr><td><strong>${uk.toUpperCase()}</strong></td><td>${name}</td><td><div class="bar-inline"><div class="bar-mini" style="width:${bw}px;background:${bc(v)}"></div><span>${v?v.toFixed(2):'–'}</span></div></td><td><strong>${conv}</strong></td><td><span class="badge-tiny ${cls}">${m}</span></td></tr>`;
+  });
+
+  const uMap={};valid.forEach(r=>{if(!uMap[r.unit])uMap[r.unit]=[];uMap[r.unit].push(r);});
+  const sh=u=>u.replace('Balai Pelatihan Aparatur Perdagangan','BPAP').replace('Balai Pelatihan Aparatur Metrologi dan Mutu','BPAMM').replace('Balai Pelatihan SDM Metrologi, Mutu, dan Jasa Perdagangan','BPMJP').replace('Pusat Pengembangan Kompetensi Aparatur Perdagangan','Pusbangkom AP').replace('Pusat Pengembangan SDM Ekspor dan Jasa Perdagangan','PPEJP').replace('Pusat Pembinaan Jabatan Fungsional Perdagangan','Pusbin JFP').replace('Akademi Metrologi dan Instrumentasi','AKMET');
+  const uLbls=Object.keys(uMap).map(sh);
+  const uVals=Object.values(uMap).map(rs=>av(rs.map(r=>r.skm.nilaiSKM)));
+  const gMap={};valid.forEach(r=>{gMap[r.jk]=(gMap[r.jk]||0)+1;});
+  const mMap={};valid.forEach(r=>{mMap[r.metode]=(mMap[r.metode]||0)+1;});
+
+  Object.values(chs).forEach(c=>{try{c.destroy();}catch(e){}});chs={};
+
+  chs.radar=new Chart(document.getElementById('chart-radar'),{type:'radar',data:{labels:Object.values(UN),datasets:[{label:'NRR',data:Object.keys(UN).map(uk=>ua[uk]?+ua[uk].toFixed(2):0),borderColor:'#C49A1E',backgroundColor:'rgba(196,154,30,.12)',pointBackgroundColor:'#C49A1E',pointRadius:5,borderWidth:2}]},options:{scales:{r:{min:1,max:4,ticks:{stepSize:.5,font:{size:10}},pointLabels:{font:{size:10}}}},plugins:{legend:{display:false}}}});
+  chs.unit=new Chart(document.getElementById('chart-unit'),{type:'bar',data:{labels:uLbls,datasets:[{data:uVals.map(v=>+v.toFixed(2)),backgroundColor:uVals.map(v=>v>=88.31?'rgba(26,140,90,.75)':v>=76.61?'rgba(43,108,176,.75)':v>=65?'rgba(221,107,32,.75)':'rgba(197,48,48,.75)'),borderRadius:8,borderSkipped:false}]},options:{indexAxis:'y',scales:{x:{min:25,max:100}},plugins:{legend:{display:false}}}});
+  chs.gender=new Chart(document.getElementById('chart-gender'),{type:'doughnut',data:{labels:Object.keys(gMap),datasets:[{data:Object.values(gMap),backgroundColor:['#0B1F35','#C49A1E'],borderWidth:2}]},options:{plugins:{legend:{position:'right',labels:{font:{size:13},boxWidth:14}}}}});
+  chs.metode=new Chart(document.getElementById('chart-metode'),{type:'doughnut',data:{labels:Object.keys(mMap),datasets:[{data:Object.values(mMap),backgroundColor:['#0B1F35','#C49A1E','#2F855A'],borderWidth:2}]},options:{plugins:{legend:{position:'right',labels:{font:{size:12},boxWidth:14}}}}});
+}
+
+// ═══════════════════════════════════════════
+// AI RECOMMENDATIONS
+// ═══════════════════════════════════════════
+async function getAI(){
+  const recs=await loadRecs();
+  const valid=recs.filter(r=>r.internal!=='Ya');
+  if(!valid.length){alert('Belum ada data.');return;}
+  const out=document.getElementById('ai-output');
+  out.innerHTML=`<div class="ai-loading"><div class="spinner"></div> Menganalisis ${valid.length} respons...</div>`;
+  const avgSKM=av(valid.map(r=>r.skm.nilaiSKM));
+  const ua={};Object.keys(UN).forEach(uk=>{const v=valid.map(r=>r.skm[uk]).filter(x=>x!==null&&x!==undefined);ua[uk]=v.length?av(v):null;});
+  const sorted=Object.entries(ua).sort((a,b)=>(a[1]||4)-(b[1]||4));
+  const low=sorted.slice(0,3).map(([k,v])=>`${UN[k]} (${v?v.toFixed(2):'–'})`).join(', ');
+  const high=sorted.slice(-3).reverse().map(([k,v])=>`${UN[k]} (${v?v.toFixed(2):'–'})`).join(', ');
+  const uMap={};valid.forEach(r=>{if(!uMap[r.unit])uMap[r.unit]=[];uMap[r.unit].push(r);});
+  const uSum=Object.entries(uMap).map(([u,r])=>`${u}: ${av(r.map(x=>x.skm.nilaiSKM)).toFixed(2)}`).join('; ');
+  const ks=valid.filter(r=>r.kritik).slice(0,8).map(r=>r.kritik).join(' | ')||'(tidak ada)';
+  const hs=valid.filter(r=>r.harapan).slice(0,8).map(r=>r.harapan).join(' | ')||'(tidak ada)';
+  const prompt=`Kamu adalah analis pelayanan publik senior di Kementerian Perdagangan Indonesia. Analisis hasil SKM BPSDMP Tahun 2026:
+
+Responden valid: ${valid.length} | Nilai SKM: ${avgSKM.toFixed(2)}/100 | Mutu: ${avgSKM>=88.31?'A–Sangat Baik':avgSKM>=76.61?'B–Baik':avgSKM>=65?'C–Kurang Baik':'D–Tidak Baik'}
+
+Nilai 9 Unsur (skala 1-4):
+${Object.entries(ua).map(([k,v])=>`- ${UN[k]}: ${v?v.toFixed(2):'belum ada data'}`).join('\n')}
+
+Unsur terendah: ${low}
+Unsur tertinggi: ${high}
+Per unit: ${uSum}
+Kritik: ${ks}
+Harapan: ${hs}
+
+Beri analisis dan rekomendasi (max 500 kata, bahasa Indonesia formal):
+1. Evaluasi singkat nilai SKM keseluruhan
+2. Rekomendasi konkret untuk 3 unsur terendah (masalah, aksi, waktu: pendek/menengah/panjang)
+3. Apresiasi singkat untuk unsur terkuat`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    const txt=d.content?.map(c=>c.text||'').join('')||'Gagal mendapatkan rekomendasi.';
+    out.innerHTML=`<div class="ai-content">${txt.replace(/</g,'&lt;')}</div><button class="btn-ai" onclick="getAI()" style="margin-top:16px">🔄 Perbarui Rekomendasi</button>`;
+  }catch(e){
+    out.innerHTML=`<div style="color:rgba(255,100,100,.8);font-size:13px">Gagal memuat rekomendasi AI.<br><small>${e.message}</small></div><button class="btn-ai" onclick="getAI()" style="margin-top:12px">Coba Lagi</button>`;
+  }
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  if(!window.storage){
+    window.storage={_d:{},
+      get(k){return this._d[k]?Promise.resolve({value:this._d[k]}):Promise.reject(new Error('nf'));},
+      set(k,v){this._d[k]=v;return Promise.resolve({key:k,value:v});},
+      delete(k){delete this._d[k];return Promise.resolve({deleted:true});},
+      list(){return Promise.resolve({keys:Object.keys(this._d)});}
+    };
+  }
+  resetForm();
+  showView('welcome');
+});
+</script>
+</body>
+</html>
