@@ -497,7 +497,7 @@
     <li><a href="#tentang">Tentang Survei</a></li>
     <li><a href="#unit-layanan">Unit Layanan</a></li>
     <li><a href="#cara-mengisi">Cara Mengisi</a></li>
-    <li><a href="https://form.jotform.com/261451552264050" target="_blank" rel="noopener" class="cta">Isi Survei ↗</a></li>
+    <li><a href="#" onclick="openConsentModal(event)" target="_blank" rel="noopener" class="cta">Isi Survei ↗</a></li>
   </ul>
   <div class="hamburger" id="hamburger" onclick="openMenu()">
     <span></span><span></span><span></span>
@@ -511,7 +511,7 @@
   <a href="#tentang" onclick="closeMenu()">Tentang Survei</a>
   <a href="#unit-layanan" onclick="closeMenu()">Unit Layanan</a>
   <a href="#cara-mengisi" onclick="closeMenu()">Cara Mengisi</a>
-  <a href="https://form.jotform.com/261451552264050" target="_blank" rel="noopener" class="cta" onclick="closeMenu()">Isi Survei Sekarang</a>
+  <a href="#" onclick="openConsentModal(event)" target="_blank" rel="noopener" class="cta" onclick="closeMenu()">Isi Survei Sekarang</a>
 </div>
 
 <!-- HERO -->
@@ -521,7 +521,7 @@
     <h1 class="hero-title">Survei Kepuasan Masyarakat pada <em>Layanan BPSDMP</em></h1>
     <p class="hero-sub">Periode Semester I dan Semester II Tahun 2025</p>
     <p class="hero-desc">Bantu kami meningkatkan kualitas pelayanan publik BPSDMP dengan memberikan penilaian berdasarkan pengalaman Saudara dalam menerima layanan.</p>
-    <a class="hero-cta" href="https://form.jotform.com/261451552264050" target="_blank" rel="noopener">
+    <a class="hero-cta" href="#" onclick="openConsentModal(event)" target="_blank" rel="noopener">
       Isi Survei Sekarang
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
@@ -650,7 +650,7 @@
       <div class="consent-icon">🤝</div>
       <h2>Pernyataan Kesediaan &amp; Objektivitas</h2>
       <p>Dengan melanjutkan ke formulir survei, Saudara menyatakan bersedia memberikan penilaian secara objektif sesuai pengalaman layanan yang diterima. Jawaban yang diberikan akan digunakan sebagai bahan evaluasi dan peningkatan kualitas pelayanan publik BPSDMP.</p>
-      <a class="btn-primary" href="https://form.jotform.com/261451552264050" target="_blank" rel="noopener">
+      <a class="btn-primary" href="#" onclick="openConsentModal(event)" target="_blank" rel="noopener">
         Saya Bersedia Mengisi Survei
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
@@ -668,7 +668,7 @@
       <span class="section-label">Akses Cepat</span>
       <h3>Pindai QR Code untuk Mengisi Survei</h3>
       <p>Pindai QR Code menggunakan kamera perangkat seluler Saudara untuk langsung membuka formulir survei tanpa perlu mengetik tautan.</p>
-      <a class="hero-cta" href="https://form.jotform.com/261451552264050" target="_blank" rel="noopener" style="font-size:14.5px; padding: 13px 28px;">
+      <a class="hero-cta" href="#" onclick="openConsentModal(event)" target="_blank" rel="noopener" style="font-size:14.5px; padding: 13px 28px;">
         Isi Survei Sekarang
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M8 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
@@ -703,7 +703,7 @@
 
 <!-- STICKY CTA MOBILE -->
 <div class="sticky-cta">
-  <a href="https://form.jotform.com/261451552264050" target="_blank" rel="noopener">
+  <a href="#" onclick="openConsentModal(event)" target="_blank" rel="noopener">
     📝 Isi Survei Sekarang
   </a>
 </div>
@@ -742,5 +742,276 @@
     }
   });
 </script>
+
+<!-- ══════════════════════════════════════════════
+     MODAL HALAMAN PEMBUKA / KONFIRMASI KESEDIAAN
+     ══════════════════════════════════════════════ -->
+<div id="consentModal" class="cm-overlay" role="dialog" aria-modal="true" aria-labelledby="cm-title">
+  <!-- PANEL: Konfirmasi -->
+  <div class="cm-panel" id="cm-confirm-panel">
+    <div class="cm-logo-row">
+      <div class="cm-logo-badge">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <path d="M14 3L4 8v6c0 5.25 4.27 10.16 10 11.33C19.73 24.16 24 19.25 24 14V8L14 3z" fill="white" opacity=".15"/>
+          <path d="M14 3L4 8v6c0 5.25 4.27 10.16 10 11.33C19.73 24.16 24 19.25 24 14V8L14 3z" stroke="white" stroke-width="1.5" fill="none"/>
+          <path d="M10 14l3 3 5-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="cm-logo-text">
+        <span>BPSDMP</span>
+        <span>Kementerian Perdagangan RI</span>
+      </div>
+    </div>
+
+    <div class="cm-divider"></div>
+
+    <div class="cm-body">
+      <div class="cm-tag">Survei Kepuasan Masyarakat · 2025</div>
+      <h2 class="cm-title" id="cm-title">
+        Apakah Saudara bersedia mengikuti Survei Kepuasan Masyarakat terhadap layanan BPSDMP Kementerian Perdagangan?
+      </h2>
+      <p class="cm-desc">
+        Survei ini bersifat <strong>sukarela</strong> dan bertujuan untuk meningkatkan kualitas pelayanan publik. Jawaban Saudara sangat berarti bagi kami.
+      </p>
+    </div>
+
+    <div class="cm-notice">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-top:1px">
+        <circle cx="8" cy="8" r="7" stroke="#C9960E" stroke-width="1.5"/>
+        <path d="M8 5v4M8 11v.5" stroke="#C9960E" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <span>Pengisian survei membutuhkan waktu sekitar <strong>3–5 menit</strong>. Data digunakan untuk keperluan evaluasi pelayanan.</span>
+    </div>
+
+    <div class="cm-actions">
+      <a class="cm-btn-yes" href="https://kemend.ag/SKM-BPSDMP2026" target="_blank" rel="noopener" onclick="closeModal()">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M4 9h10M9 4l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Ya, Saya Bersedia Mengikuti Survei
+      </a>
+      <button class="cm-btn-no" onclick="showThanksPanel()">
+        Tidak Bersedia
+      </button>
+    </div>
+  </div>
+
+  <!-- PANEL: Terima Kasih -->
+  <div class="cm-panel cm-hidden" id="cm-thanks-panel">
+    <div class="cm-thanks-icon">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+        <circle cx="22" cy="22" r="21" stroke="white" stroke-width="1.5" opacity=".3"/>
+        <path d="M22 12c-5.52 0-10 4.48-10 10s4.48 10 10 10 10-4.48 10-10-4.48-10-10-10zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="white" opacity=".9"/>
+      </svg>
+    </div>
+
+    <div class="cm-thanks-body">
+      <div class="cm-tag" style="color:var(--gold-lt);border-color:rgba(240,190,58,0.35);">Terima Kasih</div>
+      <h2 class="cm-title" style="color:white;font-size:clamp(18px,3vw,24px);">
+        Kami menghargai keputusan Saudara
+      </h2>
+      <p class="cm-desc" style="color:rgba(255,255,255,0.75);">
+        Survei ini bersifat <strong style="color:var(--gold-lt)">sukarela</strong> dan tidak ada kewajiban untuk berpartisipasi. Kami tetap berkomitmen untuk terus meningkatkan kualitas pelayanan BPSDMP demi kepuasan masyarakat.
+      </p>
+      <p class="cm-desc" style="color:rgba(255,255,255,0.65);font-size:14px;margin-top:-8px;">
+        Apabila Saudara berubah pikiran, survei dapat diakses kapan saja melalui tautan atau QR Code yang tersedia.
+      </p>
+    </div>
+
+    <div class="cm-thanks-actions">
+      <button class="cm-btn-back" onclick="showConfirmPanel()">
+        ← Kembali ke Survei
+      </button>
+      <button class="cm-btn-close" onclick="closeModal()">
+        Tutup
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL STYLES ── -->
+<style>
+  .cm-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(6, 18, 38, 0.82);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    align-items: center; justify-content: center;
+    padding: 20px;
+    animation: cmFadeIn .25s ease;
+  }
+  .cm-overlay.active { display: flex; }
+  @keyframes cmFadeIn { from { opacity:0 } to { opacity:1 } }
+
+  .cm-panel {
+    background: linear-gradient(160deg, var(--navy) 0%, #0D3060 100%);
+    border: 1px solid rgba(201,150,14,0.25);
+    border-radius: 24px;
+    width: 100%; max-width: 540px;
+    padding: 36px 40px 40px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.55);
+    animation: cmSlideUp .3s cubic-bezier(.16,1,.3,1);
+    position: relative;
+  }
+  @keyframes cmSlideUp {
+    from { opacity:0; transform: translateY(32px) scale(.97) }
+    to   { opacity:1; transform: translateY(0) scale(1) }
+  }
+  .cm-hidden { display: none !important; }
+
+  /* ── Logo row ── */
+  .cm-logo-row {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+  }
+  .cm-logo-badge {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: linear-gradient(135deg, rgba(201,150,14,.25), rgba(240,190,58,.15));
+    border: 1px solid rgba(201,150,14,.35);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .cm-logo-text { display: flex; flex-direction: column; line-height: 1.2; }
+  .cm-logo-text span:first-child {
+    font-size: 16px; font-weight: 700; color: white; letter-spacing: .3px;
+  }
+  .cm-logo-text span:last-child {
+    font-size: 11.5px; color: rgba(255,255,255,.55);
+  }
+
+  /* ── Divider ── */
+  .cm-divider {
+    height: 1px; background: rgba(255,255,255,.08);
+    margin: 0 0 24px;
+  }
+
+  /* ── Body ── */
+  .cm-tag {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--gold-lt); border: 1px solid rgba(240,190,58,.3);
+    padding: 4px 12px; border-radius: 100px; margin-bottom: 16px;
+  }
+  .cm-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(17px, 3vw, 22px);
+    font-weight: 700; color: white; line-height: 1.35;
+    margin-bottom: 14px;
+  }
+  .cm-desc {
+    font-size: 14px; color: rgba(255,255,255,.65);
+    line-height: 1.75; margin-bottom: 20px;
+  }
+  .cm-desc strong { color: rgba(255,255,255,.85); }
+
+  /* ── Notice box ── */
+  .cm-notice {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: rgba(201,150,14,.10);
+    border: 1px solid rgba(201,150,14,.22);
+    border-radius: 10px; padding: 12px 14px;
+    margin-bottom: 28px;
+    font-size: 13px; color: rgba(255,255,255,.65); line-height: 1.55;
+  }
+  .cm-notice strong { color: var(--gold-lt); }
+
+  /* ── Action buttons ── */
+  .cm-actions { display: flex; flex-direction: column; gap: 12px; }
+
+  .cm-btn-yes {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-lt));
+    color: var(--navy); font-weight: 700; font-size: 15px;
+    padding: 16px 24px; border-radius: 14px;
+    text-decoration: none; border: none; cursor: pointer;
+    transition: all .22s;
+    box-shadow: 0 6px 28px rgba(201,150,14,.40);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .cm-btn-yes:hover { transform: translateY(-1px); box-shadow: 0 10px 36px rgba(201,150,14,.50); }
+
+  .cm-btn-no {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.18);
+    color: rgba(255,255,255,.60);
+    font-size: 14px; font-weight: 500;
+    padding: 13px 24px; border-radius: 14px;
+    cursor: pointer; transition: all .2s;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .cm-btn-no:hover {
+    border-color: rgba(255,255,255,.35);
+    color: rgba(255,255,255,.85);
+    background: rgba(255,255,255,.05);
+  }
+
+  /* ── Thanks panel ── */
+  .cm-thanks-icon {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, rgba(201,150,14,.2), rgba(22,61,110,.5));
+    border: 1px solid rgba(201,150,14,.25);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 0 24px;
+  }
+  .cm-thanks-body { margin-bottom: 28px; }
+  .cm-thanks-actions { display: flex; gap: 12px; }
+
+  .cm-btn-back {
+    flex: 1;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.20);
+    color: rgba(255,255,255,.70); font-size: 14px; font-weight: 500;
+    padding: 13px 16px; border-radius: 14px; cursor: pointer;
+    transition: all .2s; font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .cm-btn-back:hover { border-color: rgba(255,255,255,.40); color: white; background: rgba(255,255,255,.06); }
+
+  .cm-btn-close {
+    flex: 1;
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255,255,255,.18);
+    color: white; font-size: 14px; font-weight: 600;
+    padding: 13px 16px; border-radius: 14px; cursor: pointer;
+    transition: all .2s; font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .cm-btn-close:hover { background: rgba(255,255,255,.16); }
+
+  /* ── Mobile adjustments ── */
+  @media (max-width: 600px) {
+    .cm-panel { padding: 28px 24px 32px; border-radius: 20px; }
+    .cm-thanks-actions { flex-direction: column; }
+  }
+</style>
+
+<!-- ── MODAL JAVASCRIPT ── -->
+<script>
+  function openConsentModal(e) {
+    if (e) e.preventDefault();
+    document.getElementById('consentModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    showConfirmPanel();
+  }
+  function closeModal() {
+    document.getElementById('consentModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  function showThanksPanel() {
+    document.getElementById('cm-confirm-panel').classList.add('cm-hidden');
+    document.getElementById('cm-thanks-panel').classList.remove('cm-hidden');
+  }
+  function showConfirmPanel() {
+    document.getElementById('cm-thanks-panel').classList.add('cm-hidden');
+    document.getElementById('cm-confirm-panel').classList.remove('cm-hidden');
+  }
+  // Close on overlay click
+  document.getElementById('consentModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+  // Close on ESC
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
+</script>
+
 </body>
 </html>
